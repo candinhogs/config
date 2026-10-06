@@ -7,7 +7,7 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 
-(load-theme 'modus-operandi t)
+(load-theme 'modus-vivendi t)
 
 (setq inhibit-startup-message t
       initial-scratch-message ";; Happy hacking!\n")
@@ -55,15 +55,8 @@
   ;; Refresh Magit buffers after Git operations.
   (setq magit-refresh-status-buffer t))
 
-(use-package diff-hl
-  :hook ((prog-mode . diff-hl-mode)
-         (text-mode . diff-hl-mode)
-         (dired-mode . diff-hl-dired-mode))
-  :config
-  (diff-hl-flydiff-mode 1)
-  (diff-hl-margin-mode 1))
-
 ;; Indentation
+
 (defun setup-programming-indentation ()
   (setq-local indent-tabs-mode nil
               tab-width 4))
@@ -88,3 +81,7 @@
 
 (add-hook 'rust-mode-hook #'setup-rust-indentation)
 (add-hook 'rust-ts-mode-hook #'setup-rust-indentation)
+
+;; Remove whitespaces
+(with-eval-after-load 'files
+  (add-hook 'before-save-hook #'delete-trailing-whitespace))
