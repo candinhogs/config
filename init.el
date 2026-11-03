@@ -1,6 +1,20 @@
+;;; -*- lexical-binding: t -*-
 ;; Packages
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/")
+             t)
+
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
+
+(setq use-package-always-ensure t)
 
 ;; UI
 (menu-bar-mode -1)
@@ -14,6 +28,7 @@
 
 (line-number-mode 1)
 (column-number-mode 1)
+(show-paren-mode 1)
 
 ;; Files
 (defconst backup-dir
@@ -24,11 +39,15 @@
 (setq backup-directory-alist
       `(("." . ,backup-dir))
       auto-save-file-name-transforms
-      `((".*" ,backup-dir t))
+      `(("." ,backup-dir t))
       lock-file-name-transforms
-      `((".*" ,backup-dir t)))
+      `(("." ,backup-dir t))
+      make-backup-files t
+      version-control t
+      kept-new-versions 6
+      kept-old-versions 2
+      delete-old-versions t)
 
-;; Custom settings
 (setq custom-file
       (expand-file-name "custom.el" user-emacs-directory))
 
@@ -38,50 +57,40 @@
 ;; Completion
 (fido-mode 1)
 
+;; Editing
+(setq-default indent-tabs-mode nil
+              tab-width 4
+              truncate-lines nil)
+
+(electric-pair-mode 1)
+(save-place-mode 1)
+
+(add-hook 'before-save-hook
+          #'delete-trailing-whitespace)
+
 ;; Magit
 (use-package magit
-  :bind (("C-x g"   . magit-status)
+  :bind (("C-x g" . magit-status)
          ("C-c g g" . magit-status)
          ("C-c g l" . magit-log-current)
          ("C-c g b" . magit-blame-addition))
   :config
-  ;; Use the current window for Magit status.
   (setq magit-display-buffer-function
-        #'magit-display-buffer-same-window-except-diff-v1)
+        #'magit-display-buffer-same-window-except-diff-v1
+        magit-diff-refine-hunk 'all))
 
-  ;; Make hunks show word-level changes.
-  (setq magit-diff-refine-hunk 'all)
-
-  ;; Refresh Magit buffers after Git operations.
-  (setq magit-refresh-status-buffer t))
-
-;; Indentation
-
-(defun setup-programming-indentation ()
-  (setq-local indent-tabs-mode nil
-              tab-width 4))
-
+;; Python
 (defun setup-python-indentation ()
-  (setup-programming-indentation)
-  (setq-local python-indent-offset 4))
+  (setq-local indent-tabs-mode nil
+              tab-width 4
+              python-indent-offset 4))
 
-(defun setup-c-cpp-indentation ()
-  (setup-programming-indentation)
-  (setq-local c-basic-offset 4))
+(add-hook 'python-mode-hook
+          #'setup-python-indentation)
 
-(defun setup-rust-indentation ()
-  (setup-programming-indentation)
-  (setq-local rust-indent-offset 4))
+(add-hook 'python-ts-mode-hook
+          #'setup-python-indentation)
 
-(add-hook 'python-mode-hook #'setup-python-indentation)
-(add-hook 'python-ts-mode-hook #'setup-python-indentation)
-
-(add-hook 'c-mode-hook #'setup-c-cpp-indentation)
-(add-hook 'c++-mode-hook #'setup-c-cpp-indentation)
-
-(add-hook 'rust-mode-hook #'setup-rust-indentation)
-(add-hook 'rust-ts-mode-hook #'setup-rust-indentation)
-
-;; Remove whitespaces
-(with-eval-after-load 'files
-  (add-hook 'before-save-hook #'delete-trailing-whitespace))
+;; Nael
+(use-package nael
+  :mode ("\\.lean\\'" . nael-mode))
