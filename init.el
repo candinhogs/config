@@ -19,9 +19,6 @@
 ;; UI
 (menu-bar-mode -1)
 (tool-bar-mode -1)
-(scroll-bar-mode -1)
-
-(load-theme 'modus-vivendi t)
 
 (setq inhibit-startup-message t
       initial-scratch-message ";; Happy hacking!\n")
@@ -94,3 +91,14 @@
 ;; Nael
 (use-package nael
   :mode ("\\.lean\\'" . nael-mode))
+
+;; Terminal compatibility
+(unless (display-graphic-p)
+  (xterm-mouse-mode 1)
+  (global-set-key (kbd "C-p") #'previous-line)
+  (global-set-key (kbd "C-n") #'next-line))
+
+;; Emacs server
+(require 'server)
+(unless (server-running-p)
+  (server-start))
